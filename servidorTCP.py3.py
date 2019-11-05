@@ -19,12 +19,10 @@ serverSocket.listen(1) # socket pronto para 'ouvir' conexoes
 print ('Servidor TCP esperando conexoes na porta %d ...' % (serverPort))
 
 def threadConnection(connectionSocket, addr):
-    oncounter = 0
-    apelido[oncounter] = connectionSocket.recv(1024) # recebe o nickname do cliente
-    apelido[oncounter] = apelido[oncounter].decode('utf-8')
-    oncouter = oncounter + 1
+    apelido = connectionSocket.recv(1024) # recebe o nickname do cliente
+    apelido = apelido.decode('utf-8')
     # capitalizedSentence = sentence.upper() # converte em letras maiusculas
-    print ('%s entrou!' % (apelido[oncounter]))
+    print ('%s entrou!' % (apelido))
     # connectionSocket.send(capitalizedSentence.encode('utf-8')) # envia para o cliente o texto transformado
     connectionSocket.close() # encerra o socket com o cliente 
     
