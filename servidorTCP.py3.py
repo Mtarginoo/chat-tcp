@@ -1,6 +1,6 @@
 # importacao das bibliotecas
 from socket import * # sockets
-from threading import Thread
+import threading
 
 # definicao das variaveis
 serverName = '' # ip do servidor (em branco)
@@ -11,7 +11,7 @@ serverSocket.listen(1) # socket pronto para 'ouvir' conexoes
 print ('Servidor TCP esperando conexoes na porta %d ...' % (serverPort))
 
 def threadConnection(connectionSocket, addr):
-    apelido = connectionSocket.recv(1024) # recebe o nickname do cliente
+    apelido = connectionSocket.recv(1024) # recebe o nickname do cliente / recv(1024) <- tamanho do buffer, deve ser potência de 2
     apelido = apelido.decode('utf-8')
     # capitalizedSentence = sentence.upper() # converte em letras maiusculas
     print ('%s entrou!' % (apelido))
@@ -20,6 +20,6 @@ def threadConnection(connectionSocket, addr):
     
 while 1:
     connectionSocket, addr = serverSocket.accept() # aceita as conexoes dos clientes
-    t1 = Thread(target=threadConnection, args=(connectionSocket, addr))
+    t1 = threading.Thread(target=threadConnection, args=(connectionSocket, addr))
     t1.start()
  
