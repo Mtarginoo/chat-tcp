@@ -9,11 +9,16 @@
 # importacao das bibliotecas
 from socket import * # sockets
 from threading import Thread
+import sys
 
 def inputMensagem():
     msg = ''
     while msg != 'sair()':
-        connectionSocket.send(msg.encode('utf-8'))
+        msg = input()
+        try:
+            connectionSocket.send(msg.encode('utf-8'))
+        except:
+            continue
         
 def recvMensagem(connectionSocket, addr, apelido):
     recvmsg = ''
@@ -52,10 +57,15 @@ serverSocket = socket(AF_INET,SOCK_STREAM) # criacao do socket TCP
 serverSocket.bind((serverName,serverPort)) # bind do ip do servidor com a porta
 serverSocket.listen(1) # socket pronto para 'ouvir' conexoes
 print ('Servidor TCP esperando conexoes na porta %d ...' % (serverPort))
+
+t2 = Thread(target=inputMensagem, args=())
+t2.start()
     
-while 1:
+while t2.isAlive():
     connectionSocket, addr = serverSocket.accept() # aceita as conexoes dos clientes
     t1 = Thread(target=threadConnection, args=(connectionSocket, addr))
     t1.start()
- 
+    
+
 serverSocket.close() # encerra o socket do servidor
+sys.exit()
