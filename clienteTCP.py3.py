@@ -23,10 +23,6 @@ def inputMensagem():
         clientSocket.send(msg.encode('utf-8'))
         
 def recvMensagem():
-    '''try:
-        recvmsg = clientSocket.recv(1024)
-        recvmsg = recvmsg.decode('utf-8')
-    except:'''
     recvmsg = ''
     while recvmsg != 'sair()':
         if recvmsg != '':

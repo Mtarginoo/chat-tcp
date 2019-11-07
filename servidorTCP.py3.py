@@ -16,10 +16,6 @@ from threading import Thread
         connectionSocket.send(msg.encode('utf-8'))"""
         
 def recvMensagem(connectionSocket, addr, apelido):
-    '''try:
-        recvmsg = connectionSocket.recv(1024)
-        recvmsg = recvmsg.decode('utf-8')
-    except:'''
     recvmsg = ''
     while recvmsg != 'sair()':
         if recvmsg != '':
@@ -58,7 +54,6 @@ serverSocket.listen(1) # socket pronto para 'ouvir' conexoes
 print ('Servidor TCP esperando conexoes na porta %d ...' % (serverPort))
     
 while 1:
-    tcont = 0
     connectionSocket, addr = serverSocket.accept() # aceita as conexoes dos clientes
     t1 = Thread(target=threadConnection, args=(connectionSocket, addr))
     t1.start()
