@@ -11,26 +11,40 @@ from socket import * # sockets
 from threading import Thread
 import sys
 
-def inputMensagem():
+clientesConectados = list();
+socketList = list()
+
+"""def inputMensagem(connectionSocket, addr, apelido):
     msg = ''
     while msg != 'sair()':
-        msg = input()
         try:
             connectionSocket.send(msg.encode('utf-8'))
         except:
-            continue
+            continue"""
         
 def recvMensagem(connectionSocket, addr, apelido):
+    global socketList
+    recvmsgIN = ('%s entrou!' % (apelido))
+    for i in socketList:
+        if (i != connectionSocket):
+            i.send(recvmsgIN.encode('utf-8'))
     recvmsg = ''
     while recvmsg != 'sair()':
         if recvmsg != '':
-            print('%s diz: %s' % (apelido, recvmsg))
+            recvmsg = ('%s diz: %s' % (apelido, recvmsg))
+            print(recvmsg)
+            for i in socketList:
+                if (i != connectionSocket):
+                    i.send(recvmsg.encode('utf-8'))
         try:
             recvmsg = connectionSocket.recv(1024)
             recvmsg = recvmsg.decode('utf-8')
         except:
             recvmsg = ''
     connectionSocket.send(recvmsg.encode('utf-8'))
+    for i in socketList:
+        if (i != connectionSocket):
+            i.send(('%s saiu!' % (apelido)).encode('utf-8'))
 
 def threadConnection(connectionSocket, addr):
     pedido = 'Digite o seu apelido: '
@@ -40,13 +54,22 @@ def threadConnection(connectionSocket, addr):
     apelido = apelido.decode('utf-8')
     # capitalizedSentence = sentence.upper() # converte em letras maiusculas
     print ('%s entrou!' % (apelido))
-    """t2 = Thread(target=inputMensagem, args=())
-    t2.start()"""
+    global clientesConectados
+    global socketList
+    clientesConectados.append(apelido)
+    socketList.append(connectionSocket)
+    
+    """t5 = Thread(target=inputMensagem, args=[connectionSocket, addr, apelido])
+    t5.start()"""
     t3 = Thread(target=recvMensagem, args=[connectionSocket, addr, apelido])
     t3.start()
     # connectionSocket.send(capitalizedSentence.encode('utf-8')) # envia para o cliente o texto transformado
     while t3.isAlive():
         continue
+    for i in clientesConectados:
+        if i == apelido:
+            clientesConectados.remove(apelido)
+            socketList.remove(connectionSocket)
     connectionSocket.close() # encerra o socket com o cliente 
     print('%s saiu!' %(apelido))
 
@@ -57,15 +80,12 @@ serverSocket = socket(AF_INET,SOCK_STREAM) # criacao do socket TCP
 serverSocket.bind((serverName,serverPort)) # bind do ip do servidor com a porta
 serverSocket.listen(1) # socket pronto para 'ouvir' conexoes
 print ('Servidor TCP esperando conexoes na porta %d ...' % (serverPort))
-
-t2 = Thread(target=inputMensagem, args=())
-t2.start()
     
-while t2.isAlive():
+while 1:
     connectionSocket, addr = serverSocket.accept() # aceita as conexoes dos clientes
     t1 = Thread(target=threadConnection, args=(connectionSocket, addr))
     t1.start()
     
+    
 
 serverSocket.close() # encerra o socket do servidor
-sys.exit()

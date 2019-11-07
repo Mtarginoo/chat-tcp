@@ -51,6 +51,8 @@ while t1.isAlive():
 while t2.isAlive():
         continue
 
+clientSocket.send(('%s saiu!' % apelido).encode('utf-8'))
+
 # modifiedSentence = clientSocket.recv(1024) # recebe do servidor a resposta
 # print ('O servidor (\'%s\', %d) respondeu com: %s' % (serverName, serverPort, modifiedSentence.decode('utf-8')))
 clientSocket.close() # encerramento o socket do cliente
