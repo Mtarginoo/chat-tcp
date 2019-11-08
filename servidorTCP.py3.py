@@ -9,10 +9,12 @@
 # importacao das bibliotecas
 from socket import * # sockets
 from threading import Thread
-import sys
+#import sys
 
-clientesConectados = list();
+clientesConectados = list()
 socketList = list()
+addrList = list()
+comandList = list()
 
 """def inputMensagem(connectionSocket, addr, apelido):
     msg = ''
@@ -24,11 +26,16 @@ socketList = list()
         
 def recvMensagem(connectionSocket, addr, apelido):
     global socketList
+    global comandList
+    global addrList
+    global clientesConectados
     recvmsgIN = ('%s entrou!' % (apelido))
     for i in socketList:
         if (i != connectionSocket):
             i.send(recvmsgIN.encode('utf-8'))
     recvmsg = ''
+    if recvmsg == 'lista()':
+    print(comandList)  
     while recvmsg != 'sair()':
         if recvmsg != '':
             recvmsg = ('%s diz: %s' % (apelido, recvmsg))
@@ -41,6 +48,13 @@ def recvMensagem(connectionSocket, addr, apelido):
             recvmsg = recvmsg.decode('utf-8')
         except:
             recvmsg = ''
+        try:
+            comand = recvmsg.split(')') #[privado(joao, dhuahsduashdisadais] 
+            userNick = comand[0].split('(')
+            userNick = userNick[1] 
+        except:
+            continue    
+
     connectionSocket.send(recvmsg.encode('utf-8'))
     for i in socketList:
         if (i != connectionSocket):
@@ -56,8 +70,12 @@ def threadConnection(connectionSocket, addr):
     print ('%s entrou!' % (apelido))
     global clientesConectados
     global socketList
+    global addrList
     clientesConectados.append(apelido)
     socketList.append(connectionSocket)
+    addrList.append(addr)
+    for i in range(len(clientesConectados)):
+            comandList[i] = clientesConectados[i] + ' , ' + addrList[i]
     
     """t5 = Thread(target=inputMensagem, args=[connectionSocket, addr, apelido])
     t5.start()"""
