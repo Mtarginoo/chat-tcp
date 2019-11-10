@@ -1,20 +1,10 @@
-# UNIVERSIDADE FEDERAL DO RIO GRANDE DO NORTE
-# DEPARTAMENTO DE ENGENHARIA DE COMPUTACAO E AUTOMACAO
-# DISCIPLINA REDES DE COMPUTADORES (DCA0113)
-# AUTOR: PROF. CARLOS M D VIEGAS (viegas 'at' dca.ufrn.br)
-#
-# SCRIPT: Servidor de sockets TCP modificado para receber texto minusculo do cliente enviar resposta em maiuscula
-#
-
-# importacao das bibliotecas
 from socket import * # sockets
 from threading import Thread
-#import sys
+import sys
 
 clientesConectados = list()
 socketList = list()
-addrList = list()
-comandList = list()
+
 
 """def inputMensagem(connectionSocket, addr, apelido):
     msg = ''
@@ -26,16 +16,24 @@ comandList = list()
         
 def recvMensagem(connectionSocket, addr, apelido):
     global socketList
-    global comandList
-    global addrList
-    global clientesConectados
     recvmsgIN = ('%s entrou!' % (apelido))
     for i in socketList:
         if (i != connectionSocket):
             i.send(recvmsgIN.encode('utf-8'))
     recvmsg = ''
-    if recvmsg == 'lista()':
-    print(comandList)  
+    if recvMensagem == "lista()":
+        print("Lista dos clientes conectados ao servidor:")    
+        for i in range(len(clientesConectados)):
+            convstr = str(socketList[i])
+            spt = convstr.split("raddr=(")
+            convstr = str(spt[1])
+            spt2 = convstr.split(")")
+            ipPort = spt2[0]
+            ipPortNick = "<" + ipPort + ", " + clientesConectados[i] + ">"
+            for j in socketList:
+                if j == connectionSocket:
+                    j.send(ipPortNick.encode('utf-8'))
+
     while recvmsg != 'sair()':
         if recvmsg != '':
             recvmsg = ('%s diz: %s' % (apelido, recvmsg))
@@ -48,62 +46,82 @@ def recvMensagem(connectionSocket, addr, apelido):
             recvmsg = recvmsg.decode('utf-8')
         except:
             recvmsg = ''
-        try:
-            comand = recvmsg.split(')') #[privado(joao, dhuahsduashdisadais] 
-            userNick = comand[0].split('(')
-            userNick = userNick[1] 
-        except:
-            continue    
-
     connectionSocket.send(recvmsg.encode('utf-8'))
     for i in socketList:
         if (i != connectionSocket):
             i.send(('%s saiu!' % (apelido)).encode('utf-8'))
 
-def threadConnection(connectionSocket, addr):
-    pedido = 'Digite o seu apelido: '
-    pedido = pedido.encode('utf-8')
-    connectionSocket.send(pedido)
-    apelido = connectionSocket.recv(1024) # recebe o nickname do cliente
-    apelido = apelido.decode('utf-8')
-    # capitalizedSentence = sentence.upper() # converte em letras maiusculas
-    print ('%s entrou!' % (apelido))
+
+def comandList():
     global clientesConectados
     global socketList
-    global addrList
-    clientesConectados.append(apelido)
-    socketList.append(connectionSocket)
-    addrList.append(addr)
+    comand = ''
+    while comand != 'lista()':
+        comand = input()
+    print("Lista dos clientes conectados ao servidor:")    
     for i in range(len(clientesConectados)):
-            comandList[i] = clientesConectados[i] + ' , ' + addrList[i]
+        convstr = str(socketList[i])
+        spt = convstr.split("raddr=(")
+        convstr = str(spt[1])
+        spt2 = convstr.split(")")
+        ipPort = spt2[0]
+        ipPortNick = "<" + ipPort + ", " + clientesConectados[i] + ">"
+        print(ipPortNick)
+
+    """        
+    for i in range(len(clientesConectados)):
+        tupla = str(addr) 
+        ipPort = tupla.split(")")
+        ipPort = ipPort[0]
+        ipPortNick = str(ipPort) + ", " + clientesConectados[i] + ")"    
+        print(ipPortNick)
+    """ 
+
+def threadConnection(connectionSocket, addr):
+    pedido = 'Digite o seu apelido: '
+    pedido = pedido.encode('utf-8') 
+    connectionSocket.send(pedido)                                               # envia para os clientes a requisitação do pedido do apelido
+    apelido = connectionSocket.recv(1024)                                       # recebe o nickname do cliente
+    apelido = apelido.decode('utf-8') 
+    print ('%s entrou!' % (apelido))                                            # mostra no servidor que um cliente se conectou
+    global clientesConectados                                                   # lista com o nickname dos clientes conectados
+    global socketList                                                           # lista com os sockets dos clientes
+    clientesConectados.append(apelido)                                          # adiciona na lista os nicknames dos clientes conectados
+    socketList.append(connectionSocket)                                         # adiciona na lista o socket dos clientes conectados
     
     """t5 = Thread(target=inputMensagem, args=[connectionSocket, addr, apelido])
     t5.start()"""
-    t3 = Thread(target=recvMensagem, args=[connectionSocket, addr, apelido])
+    t3 = Thread(target=recvMensagem, args=[connectionSocket, addr, apelido]) 
     t3.start()
-    # connectionSocket.send(capitalizedSentence.encode('utf-8')) # envia para o cliente o texto transformado
-    while t3.isAlive():
+    t4 = Thread(target=comandList, args =())
+    t4.start()                                                                  # inicialização do socketo redecibmento de mensagensd
+
+    while t3.isAlive():                                                         # executa enquanto a thread t3 estiver ativa (input != sair())
         continue
-    for i in clientesConectados:
+
+    for i in clientesConectados: 
         if i == apelido:
             clientesConectados.remove(apelido)
             socketList.remove(connectionSocket)
-    connectionSocket.close() # encerra o socket com o cliente 
+    connectionSocket.close()                                                   # encerra o socket com o cliente 
     print('%s saiu!' %(apelido))
 
+
 # definicao das variaveis
-serverName = '' # ip do servidor (em branco)
-serverPort = 65000 # porta a se conectar
-serverSocket = socket(AF_INET,SOCK_STREAM) # criacao do socket TCP
-serverSocket.bind((serverName,serverPort)) # bind do ip do servidor com a porta
-serverSocket.listen(1) # socket pronto para 'ouvir' conexoes
+
+serverName = ''                                                                # ip do servidor (em branco)
+serverPort = 65000                                                             # porta a se conectar
+serverSocket = socket(AF_INET,SOCK_STREAM)                                     # criacao do socket TCP
+serverSocket.bind((serverName,serverPort))                                     # bind do ip do servidor com a porta
+serverSocket.listen(1)                                                         # socket pronto para 'ouvir' conexoes
 print ('Servidor TCP esperando conexoes na porta %d ...' % (serverPort))
     
 while 1:
-    connectionSocket, addr = serverSocket.accept() # aceita as conexoes dos clientes
-    t1 = Thread(target=threadConnection, args=(connectionSocket, addr))
-    t1.start()
+    connectionSocket, addr = serverSocket.accept()                             # aceita as conexoes dos clientes
+    t1 = Thread(target=threadConnection, args=(connectionSocket, addr))        # instancia a thread de conexão
+    t1.start()                                                                 # inicia a thread de conexão
+                                                                    
     
     
 
-serverSocket.close() # encerra o socket do servidor
+serverSocket.close()                                                           # encerra o socket do servidor
