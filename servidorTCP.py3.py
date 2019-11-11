@@ -4,6 +4,7 @@ import sys
 
 clientesConectados = list()
 socketList = list()
+finish = False
 
 
 """def inputMensagem(connectionSocket, addr, apelido):
@@ -21,20 +22,10 @@ def recvMensagem(connectionSocket, addr, apelido):
         if (i != connectionSocket):
             i.send(recvmsgIN.encode('utf-8'))
     recvmsg = ''
-    if recvMensagem == "lista()":
-        print("Lista dos clientes conectados ao servidor:")    
-        for i in range(len(clientesConectados)):
-            convstr = str(socketList[i])
-            spt = convstr.split("raddr=(")
-            convstr = str(spt[1])
-            spt2 = convstr.split(")")
-            ipPort = spt2[0]
-            ipPortNick = "<" + ipPort + ", " + clientesConectados[i] + ">"
-            for j in socketList:
-                if j == connectionSocket:
-                    j.send(ipPortNick.encode('utf-8'))
 
     while recvmsg != 'sair()':
+        if(finish == True):
+            break
         if recvmsg != '':
             recvmsg = ('%s diz: %s' % (apelido, recvmsg))
             print(recvmsg)
@@ -56,26 +47,27 @@ def comandList():
     global clientesConectados
     global socketList
     comand = ''
-    while comand != 'lista()':
+    while comand != 'lista()' and comand != 'sair()':
         comand = input()
-    print("Lista dos clientes conectados ao servidor:")    
-    for i in range(len(clientesConectados)):
-        convstr = str(socketList[i])
-        spt = convstr.split("raddr=(")
-        convstr = str(spt[1])
-        spt2 = convstr.split(")")
-        ipPort = spt2[0]
-        ipPortNick = "<" + ipPort + ", " + clientesConectados[i] + ">"
-        print(ipPortNick)
+    if comand == 'lista()':
+        print("Lista dos clientes conectados ao servidor:")    
+        for i in range(len(clientesConectados)):
+            convstr = str(socketList[i])
+            spt = convstr.split("raddr=(")
+            convstr = str(spt[1])
+            spt2 = convstr.split(")")
+            ipPort = spt2[0]
+            ipPortNick = "<" + ipPort + ", " + clientesConectados[i] + ">"
+            print(ipPortNick)
+    else:
+        msg = 'sair()'
+        print("Encerrando o servidor...")
+        msg = msg.encode('utf-8')
+        for i in socketList:
+            i.send(msg)    
+        print("aqui")    
 
-    """        
-    for i in range(len(clientesConectados)):
-        tupla = str(addr) 
-        ipPort = tupla.split(")")
-        ipPort = ipPort[0]
-        ipPortNick = str(ipPort) + ", " + clientesConectados[i] + ")"    
-        print(ipPortNick)
-    """ 
+
 
 def threadConnection(connectionSocket, addr):
     pedido = 'Digite o seu apelido: '
@@ -92,10 +84,8 @@ def threadConnection(connectionSocket, addr):
     """t5 = Thread(target=inputMensagem, args=[connectionSocket, addr, apelido])
     t5.start()"""
     t3 = Thread(target=recvMensagem, args=[connectionSocket, addr, apelido]) 
-    t3.start()
-    t4 = Thread(target=comandList, args =())
-    t4.start()                                                                  # inicialização do socketo redecibmento de mensagensd
-
+    t3.start()                                                                  # inicialização do socketo redecibmento de mensagensd
+                                             
     while t3.isAlive():                                                         # executa enquanto a thread t3 estiver ativa (input != sair())
         continue
 
@@ -103,7 +93,7 @@ def threadConnection(connectionSocket, addr):
         if i == apelido:
             clientesConectados.remove(apelido)
             socketList.remove(connectionSocket)
-    connectionSocket.close()                                                   # encerra o socket com o cliente 
+    connectionSocket.close()                                                    # encerra o socket com o cliente 
     print('%s saiu!' %(apelido))
 
 
@@ -120,8 +110,7 @@ while 1:
     connectionSocket, addr = serverSocket.accept()                             # aceita as conexoes dos clientes
     t1 = Thread(target=threadConnection, args=(connectionSocket, addr))        # instancia a thread de conexão
     t1.start()                                                                 # inicia a thread de conexão
-                                                                    
-    
-    
-
+    t4 = Thread(target=comandList, args =())
+    t4.start()                                                                  # inicialização do socketo redecibmento de mensagensd
+                                                                
 serverSocket.close()                                                           # encerra o socket do servidor

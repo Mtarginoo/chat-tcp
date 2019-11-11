@@ -1,5 +1,6 @@
 from socket import *
 from threading import Thread
+import sys
     
 # definicao das variaveis
 serverName = 'localhost'                                                                  # ip do servidor
@@ -7,22 +8,35 @@ serverPort = 65000                                                              
 clientSocket = socket(AF_INET,SOCK_STREAM)                                                # criacao do socket TCP
 clientSocket.connect((serverName, serverPort))                                            # conecta o socket ao servidor
 
+finish = False
+
 def inputMensagem():                                                       
     msg = ''
+    global finish
     while msg != 'sair()':
+        if(finish == True):
+            break   
         msg = input()
         clientSocket.send(msg.encode('utf-8'))
+            
         
-def recvMensagem():
-    recvmsg = ''
+def recvMensagem():                                                                           
+    global finish
+    recvmsg = ''                          
     while recvmsg != 'sair()':
         if recvmsg != '':
             print(recvmsg)
+            print("oi")
         try:
             recvmsg = clientSocket.recv(1024)
             recvmsg = recvmsg.decode('utf-8')
         except:
             recvmsg = ''
+    print("encerrando conexão com o servidor...")
+    finish = True
+
+              
+
 
 pedido = clientSocket.recv(1024)
 pedido = pedido.decode('utf-8')
