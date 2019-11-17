@@ -14,24 +14,22 @@ def recvMensagem(connectionSocket, addr, apelido):
             i.send(recvmsgIN.encode('utf-8'))
     mensagem = ''
     comando = ''
-    while comando != 'sair()':
+    while comando != 'sair':
         if comando == 'privado':
             y = mensagem.split('/*')
             destino = y[0]
             mensagem = ('%s enviou em privado: '% (apelido) + y[1])
-            print('y[1]: ', y[1])
             cont = 0
             for nome in clientesConectados:
                 if nome == destino:
                     socketList[cont].send(mensagem.encode('utf-8'))
-                    print("aqui")
                     break
                 else:
                     cont = cont + 1
-            mensagem = ''
+            comando = ''
         elif comando == 'lista':
             enviarLista(connectionSocket)
-            mensagem = ''
+            comando = ''
         else:
             if mensagem != '':
                 mensagem = ('%s diz: %s' % (apelido, mensagem))
@@ -45,13 +43,14 @@ def recvMensagem(connectionSocket, addr, apelido):
                 tamanho, nick, comando, mensagem = decodeProtocol(recvmsg)
             except:
                 mensagem = ''
+    comando = 'sair()'            
     connectionSocket.send(comando.encode('utf-8'))
     for i in socketList:
         if (i != connectionSocket):
             i.send(('%s saiu!' % (apelido)).encode('utf-8'))
 
 
-def comandList():    
+def comandList():                                                             # recebe o comando de envio da lista
     comand = ''
     while 1:
         comand = input()
@@ -60,7 +59,7 @@ def comandList():
             imprimirLista()
             
                 
-def imprimirLista():
+def imprimirLista():                                                          # imprime a lista de clientes conectados
     global clientesConectados
     global socketList
     for i in range(len(clientesConectados)):
@@ -72,7 +71,7 @@ def imprimirLista():
         ipPortNick = "<" + ipPort + ", " + clientesConectados[i] + ">"
         print(ipPortNick)
         
-def enviarLista(connectionSocket):
+def enviarLista(connectionSocket):                                            # envia a lista de clientes conectados para o cliente
     global clientesConectados
     global socketList
     for i in range(len(clientesConectados)):
@@ -84,15 +83,12 @@ def enviarLista(connectionSocket):
         ipPortNick = "<" + ipPort + ", " + clientesConectados[i] + ">"
         connectionSocket.send(ipPortNick.encode('utf-8'))
 
-
-
-def decodeProtocol(msgRecebida):
-    header = msgRecebida.split('/0')
+def decodeProtocol(msgRecebida):                                               # decodifica a mensagem recebida do cliente
+    header = msgRecebida.split('/0')                                         
     size = header[0]
     nick = header[1]
     cmd = header[2]
     data = header[3]
-    print(size, nick, cmd, data)
     return size, nick, cmd, data
     
 
@@ -133,13 +129,13 @@ serverSocket.bind((serverName,serverPort))                                     #
 serverSocket.listen(1)                                                         # socket pronto para 'ouvir' conexoes
 print ('Servidor TCP esperando conexoes na porta %d ...' % (serverPort))
 
-t4 = Thread(target=comandList, args =())
-t4.start()
+t4 = Thread(target=comandList, args =())                                       # instancia a thread para listar usuários no terminal do servidor
+t4.start()                                                                     #inicia a thread de listagem de usuários no terminal do servidor
  
 while 1:
     connectionSocket, addr = serverSocket.accept()                             # aceita as conexoes dos clientes
     t1 = Thread(target=threadConnection, args=(connectionSocket, addr))        # instancia a thread de conexão
     t1.start()                                                                 # inicia a thread de conexão
-                                                                      # inicialização do socketo redecibmento de mensagensd
+                                                            
                                                                 
 serverSocket.close()                                          
